@@ -17,7 +17,7 @@ class Grid:
             print(line)
 
 Grid.aStar = aStar.aStar
-Grid.qLearning = qLearning
+Grid.qLearning = qLearning.qLearning
 
 g = Grid()
 g.readFile("world.txt")
