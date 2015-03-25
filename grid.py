@@ -1,4 +1,4 @@
-import aStar
+#import aStar
 import qLearning
 
 class Grid:
@@ -7,7 +7,7 @@ class Grid:
     def readFile(self, path):
        with open(path, "r") as ifs:
             for line in ifs:
-                ls = [x for x in line]
+                ls = [x for x in line.rstrip()]
                 self.world.append(ls)
     def printWorld(self):
         for x in self.world:
@@ -16,12 +16,15 @@ class Grid:
                 line += str(y) + " "
             print(line)
 
-Grid.aStar = aStar.aStar
+#Grid.aStar = aStar.aStar
 Grid.qLearning = qLearning.qLearning
 
 g = Grid()
 g.readFile("world.txt")
-g.printWorld();
+g.printWorld()
+start = (0,0)
+goal = (4,4)
+g.qLearning(start, goal)
 
 
 
