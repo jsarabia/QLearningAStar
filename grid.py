@@ -23,7 +23,7 @@ g = Grid()
 g.readFile("world.txt")
 g.printWorld()
 start = (0,0)
-goal = (4,4)
+goal = (2,1)
 g.qLearning(start, goal)
 
 

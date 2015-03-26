@@ -5,30 +5,40 @@ def qLearning(self, start, goal):
     qInit(q_table, self.world, goal)
     printQTable(q_table)
     printRewards(q_table)
-    for i in range(1000):
+    for i in range(100):
         y = rnd.randint(0, len(q_table)-1)
         x = rnd.randint(0, len(q_table[y])-1)
+        while(self.world[y][x] == "x" or q_table[y][x].getReward() == 100):
+            y = rnd.randint(0, len(q_table)-1)
+            x = rnd.randint(0, len(q_table[y])-1)
         episode(self.world, q_table, q_table[y][x], 0, .5)
-    printRewards(q_table)
+    printQTable(q_table)
 
 #gets neighbors, updates the reward, and then moves to the next state
 #returns if depth exceeded, goal reached, or an invalid state reached
 def episode(world, qt, state, depth, gamma):
-    if(depth>150):
-        return 0
-    pos = state.getPosition()
-    x = pos[0]
-    y = pos[1]
+    if(depth>15):
+        print("early death")
+        return 0.0
+    (x,y) = state.getPosition()
     if(world[y][x] == "x"):
-        return 0
+        print("went to the obstacle")
+        return 0.0
     if(qt[y][x].getReward() == 100):
-        return
-    neighbors = getNeighbors(world, qt, state)
-    chosenState = nextState(qt,neighbors)
-    chosenState.visit()
-    qt[y][x].setReward(state.getReward() + gamma*chosenState.getReward()*(1.0/2**chosenState.timesVisited()))
-
-    episode(world, qt, nextState(qt, neighbors), depth+1, gamma)
+        return 100.0
+    neighbors = state.getActions()#getNeighbors(world, qt, state) # get the list of available states to travel to
+    next_state, direction = nextState(qt, neighbors, state) # get the state with the optimal value, and the direction taken to get there
+    state.takeAction(direction) # add to the counter for taking the direction
+    # part2 = gamma*state.getActionReward(direction)
+    # part3 = (1/state.numTaken(direction))
+    # part4 = episode(world, qt, next_state, depth+1, gamma)
+    # if(part4 == None):
+    #     return 0
+    # print("Part 2 is "+ str(part2)+ " other part is " + str(part3) + " part 4 is " + str(part4))
+    #print("winning states reward is " + str(qt[1][1].getActionReward("right")))
+    reward = next_state.getReward() + gamma*max([next_state.getActionReward(l) for l in next_state.getActions()]) # * (1/state.numTaken(direction)) 
+    state.setActionReward(direction, reward)
+    episode(world, qt, next_state, depth+1, gamma)
 
 #looks u/d/l/r for valid neighbors and adds them to a list
 def getNeighbors(world, qt, state):
@@ -39,30 +49,55 @@ def getNeighbors(world, qt, state):
     n = len(qt)
     m = len(qt[y])
 
-    if(x+1 < m and qt[y][x+1] != "x"):
+    if(x+1 < m and world[y][x+1] != "x"):
         neighbors.append(qt[y][x+1])
-    if(x-1 >= 0 and qt[y][x-1] != "x"):
+    if(x-1 >= 0 and world[y][x-1] != "x"):
         neighbors.append(qt[y][x-1])
-    if(y+1 < n and qt[y+1][x] != "x"):
+    if(y+1 < n and world[y+1][x] != "x"):
         neighbors.append(qt[y+1][x])
-    if(y-1 >=0 and qt[y-1][x] != "x"):
+    if(y-1 >=0 and world[y-1][x] != "x"):
         neighbors.append(qt[y-1][x])
     
     return neighbors
 
 #given a list of neighboring states, the one with the highest reward is returned
-def nextState(qt, neighbors):
-    index = 0
-    maxReward = 0
+def nextState(qt, neighbors, current):
+    direction = 0
+    max_val = 0
     i = 0
+    index = 0
     for x in neighbors:
-        if(x.getReward() > maxReward):
-            maxReward = x.getReward()
-            index  = i 
-        i+=0
-    if (maxReward == 0):
-        index = rnd.randint(0,len(neighbors)-1)
-    return neighbors[index]
+        if(current.getActionReward(x) > max_val):
+            max_val = current.getActionReward(x)
+            index = i
+        i+=1
+    direction = neighbors[index]
+    min_val = 10000
+    if(max_val == 0):
+        i = 0
+        index = 0
+        for x in neighbors:
+            if(current.getActionReward(x) < min_val):
+                min_val = current.getActionReward(x)
+                index = i
+            i+=1
+        direction = neighbors[index] # if all directions are 0, pick the path least traveled by  
+    if(min_val == 10000):  
+        index = rnd.randint(0, len(neighbors)-1)
+        direction = neighbors[index]
+    next_pos = None
+    (x,y) = current.getPosition()
+    if(direction == "left"):
+        next_pos = qt[y][x-1]
+    elif(direction == "right"):
+        next_pos = qt[y][x+1]
+    elif(direction == "up"):
+        next_pos = qt[y-1][x]
+    elif(direction == "down"):
+        next_pos = qt[y+1][x]
+    if(next_pos == None):
+        print(direction)
+    return next_pos, direction
 
 def qInit(qt, world, goal):
     n = len(world)
@@ -71,8 +106,6 @@ def qInit(qt, world, goal):
         ls = []
         for x in range(m):
             temp = State(x,y)
-            if(world[y][x] == "x"):
-                temp.addAction("invalid", 0)
             if(x+1 < m and world[y][x+1] != "x"):
                 temp.addAction("right", 0)
             if(x-1 >= 0 and world[y][x-1] != "x"):
@@ -81,7 +114,11 @@ def qInit(qt, world, goal):
                 temp.addAction("down", 0)
             if(y-1 >=0 and world[y-1][x] != "x"):
                 temp.addAction("up", 0)
+            if((x+1 < m and world[y][x+1] == "x") or (x-1 >= 0 and world[y][x-1] == "x") or (y+1 < n and world[y+1][x] == "x") or (y-1 >=0 and world[y-1][x] == "x")):
+                temp.addAction("invalid", 0)
+                temp.setReward(-1)    
             if(y == goal[1] and x == goal[0]):
+                print("heyyyyyyyyy")
                 temp.setReward(100)
             ls.append(temp)
         qt.append(ls)
@@ -89,7 +126,7 @@ def qInit(qt, world, goal):
 def printQTable(qt):
     for y in range(len(qt)):
         for x in range(len(qt[y])):
-            string = "State " + str(qt[y][x].getPosition()) + "'s Actions: " + str(qt[y][x].getActions())
+            string = "State " + str(qt[y][x].getPosition()) + "'s Actions: " + str(qt[y][x].getActionDict())
             print(string)
 
 def printRewards(qt):
@@ -98,6 +135,8 @@ def printRewards(qt):
         for x in range(len(qt[y])):
             string += str(qt[y][x].getReward()) + " "
         print(string)
+
+
 class State:
     def __init__(self, x, y):
         self.position = (x, y)
@@ -105,18 +144,32 @@ class State:
         self.reward = 0
         self.visited = 0
     def addAction(self,direction, value):
-        self.actions[direction] = value
+        self.actions[direction] = [value, 0]
+    def setActionReward(self,direction,value):
+        #print("State " + str(self.position) + "reward for direction " + direction + " is being set to " + str(value))
+        self.actions[direction][1] = value
+    def getActionReward(self, direction):
+        return self.actions[direction][1]
+    def takeAction(self, direction):
+        if(direction in self.actions.keys()):
+            self.actions[direction][0] += 1
+        else:
+            print(self.actions.keys())
+    def numTaken(self, direction):
+        if(direction in self.actions.keys()):
+            return self.actions[direction][0]
+        else:
+            print("Invalid direction " + direction)
+            return 1
     def getPosition(self):
         return self.position
     def getActions(self):
+        return self.actions.keys()
+    def getActionDict(self):
         return self.actions
     def setReward(self, reward):
         self.reward = reward
     def getReward(self):
         return self.reward
-    def visit(self):
-        self.visited+=1
-    def timesVisited(self):
-        return self.visited    
 
 
