@@ -13,6 +13,7 @@ def qLearning(self, start, goal):
             x = rnd.randint(0, len(q_table[y])-1)
         episode(self.world, q_table, q_table[y][x], 0, .5)
     printQTable(q_table)
+    traverseGrid((0,0),(2,1), q_table)
 
 #gets neighbors, updates the reward, and then moves to the next state
 #returns if depth exceeded, goal reached, or an invalid state reached
@@ -114,9 +115,9 @@ def qInit(qt, world, goal):
                 temp.addAction("down", 0)
             if(y-1 >=0 and world[y-1][x] != "x"):
                 temp.addAction("up", 0)
-            if((x+1 < m and world[y][x+1] == "x") or (x-1 >= 0 and world[y][x-1] == "x") or (y+1 < n and world[y+1][x] == "x") or (y-1 >=0 and world[y-1][x] == "x")):
-                temp.addAction("invalid", 0)
-                temp.setReward(-1)    
+            #if((x+1 < m and world[y][x+1] == "x") or (x-1 >= 0 and world[y][x-1] == "x") or (y+1 < n and world[y+1][x] == "x") or (y-1 >=0 and world[y-1][x] == "x")):
+            #    temp.addAction("invalid", 0)
+            #    temp.setReward(-1)    
             if(y == goal[1] and x == goal[0]):
                 print("heyyyyyyyyy")
                 temp.setReward(100)
@@ -135,6 +136,19 @@ def printRewards(qt):
         for x in range(len(qt[y])):
             string += str(qt[y][x].getReward()) + " "
         print(string)
+
+def traverseGrid(start, goal, qt):
+    (xs,ys) = start
+    (xg,yg) = goal
+    reachedEnd = False
+    while(not reachedEnd):
+        if(xs == xg and ys == yg):
+            reachedEnd = True
+            break;
+        else:
+            next_state, direction = nextState(qt, qt[ys][xs].getActions(), qt[ys][xs])
+            print(direction)
+            (xs,ys) = next_state.getPosition()
 
 
 class State:
