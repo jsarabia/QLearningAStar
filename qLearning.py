@@ -5,7 +5,7 @@ def qLearning(self, start, goal):
     qInit(q_table, self.world, goal)
     printQTable(q_table)
     printRewards(q_table)
-    for i in range(100):
+    for i in range(1000):
         y = rnd.randint(0, len(q_table)-1)
         x = rnd.randint(0, len(q_table[y])-1)
         while(self.world[y][x] == "x" or q_table[y][x].getReward() == 100):
@@ -18,15 +18,15 @@ def qLearning(self, start, goal):
 #gets neighbors, updates the reward, and then moves to the next state
 #returns if depth exceeded, goal reached, or an invalid state reached
 def episode(world, qt, state, depth, gamma):
-    if(depth>15):
+    if(depth>150):
         print("early death")
-        return 0.0
+        return
     (x,y) = state.getPosition()
     if(world[y][x] == "x"):
         print("went to the obstacle")
-        return 0.0
+        return
     if(qt[y][x].getReward() == 100):
-        return 100.0
+        return
     neighbors = state.getActions()#getNeighbors(world, qt, state) # get the list of available states to travel to
     next_state, direction = nextState(qt, neighbors, state) # get the state with the optimal value, and the direction taken to get there
     state.takeAction(direction) # add to the counter for taking the direction
@@ -38,7 +38,7 @@ def episode(world, qt, state, depth, gamma):
     # print("Part 2 is "+ str(part2)+ " other part is " + str(part3) + " part 4 is " + str(part4))
     #print("winning states reward is " + str(qt[1][1].getActionReward("right")))
     reward = next_state.getReward() + gamma*max([next_state.getActionReward(l) for l in next_state.getActions()]) # * (1/state.numTaken(direction)) 
-    state.setActionReward(direction, reward)
+    state.setActionReward(direction, max(reward, state.getActionReward(direction)))
     episode(world, qt, next_state, depth+1, gamma)
 
 #looks u/d/l/r for valid neighbors and adds them to a list
@@ -64,7 +64,7 @@ def getNeighbors(world, qt, state):
 #given a list of neighboring states, the one with the highest reward is returned
 def nextState(qt, neighbors, current):
     direction = 0
-    max_val = 0
+    '''max_val = 0
     i = 0
     index = 0
     for x in neighbors:
@@ -83,9 +83,11 @@ def nextState(qt, neighbors, current):
                 index = i
             i+=1
         direction = neighbors[index] # if all directions are 0, pick the path least traveled by  
-    if(min_val == 10000):  
+    if(min_val == 0):  
         index = rnd.randint(0, len(neighbors)-1)
-        direction = neighbors[index]
+        direction = neighbors[index]'''
+    index = rnd.randint(0, len(neighbors)-1)
+    direction = neighbors[index]
     next_pos = None
     (x,y) = current.getPosition()
     if(direction == "left"):
