@@ -4,6 +4,7 @@ import qLearning
 class Grid:
     def __init__(self):
         self.world = []
+<<<<<<< HEAD
         self.cols = 0       #added by yuksel
         self.rows = 0       #added by yuksel
         self.walls = []     #added by yuksel
@@ -21,6 +22,13 @@ class Grid:
                 if(self.world[y][x] == "x"):                 #added by yuksel
                     self.walls.append((x, y))           #added by yuksel
 
+=======
+    def readFile(self, path):
+       with open(path, "r") as ifs:
+            for line in ifs:
+                ls = [x for x in line]
+                self.world.append(ls)
+>>>>>>> master
     def printWorld(self):
         for x in self.world:
             line = ''
@@ -28,6 +36,7 @@ class Grid:
                 line += str(y) + " "
             print(line)
 
+<<<<<<< HEAD
     #added by yuksel
     def adjacent(self, loc):
         (x, y) = loc
@@ -52,10 +61,14 @@ class Grid:
 Grid.aStar = aStar.aStar                            #added by yuksel
 Grid.draw_grid = aStar.draw_grid                    #added by yuksel
 Grid.reconstruct_path = aStar.reconstruct_path      #added by yuksel
+=======
+Grid.aStar = aStar.aStar
+>>>>>>> master
 Grid.qLearning = qLearning.qLearning
 
 g = Grid()
 g.readFile("world.txt")
+<<<<<<< HEAD
 g.printWorld()
 start = (0,0)                  
 goal = (4,4)                   
@@ -73,5 +86,9 @@ g.draw_grid(fcost, start, goal)
 print("path")
 g.reconstruct_path(return_paths, start, goal)
 print()
+=======
+g.printWorld();
+
+>>>>>>> master
 
 
