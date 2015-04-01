@@ -180,7 +180,7 @@ class State:
     def getPosition(self):
         return self.position
     def getActions(self):
-        return self.actions.keys()
+        return list(self.actions.keys())
     def getActionDict(self):
         return self.actions
     def setReward(self, reward):
