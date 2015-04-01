@@ -25,6 +25,3 @@ g.printWorld()
 start = (0,0)
 goal = (2,1)
 g.qLearning(start, goal)
-
-
-
