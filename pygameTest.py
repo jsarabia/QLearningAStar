@@ -3,6 +3,7 @@ import random as rng
 import numpy as np
 import sys
 import grid
+import math
 
 class Obstacle:
     #let height/width be the distance from the center
@@ -11,17 +12,36 @@ class Obstacle:
         self.yPos = y
         self.height = height
         self.width = width
-    def collision(self, x, y, r):
+    '''def collision(self, x, y, r):
         xcol, ycol = 0, 0
-        if (x+r > self.xPos - self.width and x+r < self.xPos + self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height):
+        if(x+r > self.xPos - self.width and x-r < self.xPos + self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height):
             xcol = 1
-        if(x-r < self.xPos + self.width and x-r > self.xPos - self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height):
+            ycol = 1
+            print("right side of circle")
+        ''''''if(x-r < self.xPos + self.width and x-r > self.xPos - self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height):
             xcol = 1
+            print("left side of circle")
         if(x+r > self.xPos - self.width and x-r < self.xPos + self.width and y+r > self.yPos - self.height and y+r < self.yPos + self.height):
             ycol = 1
+            print("bottom of circle")
         if(x+r > self.xPos - self.width and x-r < self.xPos + self.width and y-r < self.yPos + self.height and y-r > self.yPos -self.height):
             ycol = 1
-        return xcol, ycol
+            print("top of circle")
+        if(xcol == 1 or ycol == 1):
+            xcol, ycol = 0, 0
+            if(not(x+r > self.xPos - self.width and x+r < self.xPos + self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height)):
+                xcol = 1
+                print("right side of circle CHECKER")
+            if(not(x-r < self.xPos + self.width and x-r > self.xPos - self.width and y-r < self.yPos + self.height and y+r > self.yPos - self.height)):
+                xcol = 1
+                print("left side of circle CHECKER")
+            if(not(x+r > self.xPos - self.width and x-r < self.xPos + self.width and y+r > self.yPos - self.height and y+r < self.yPos + self.height)):
+                ycol = 1
+                print("bottom of circle CHECKER")
+            if(not(x+r > self.xPos - self.width and x-r < self.xPos + self.width and y-r < self.yPos + self.height and y-r > self.yPos -self.height)):
+                ycol = 1
+                print("top of circle CHECKER")''''''
+        return xcol, ycol'''
     def draw(self, screen):
         pygame.draw.polygon(screen, (0,0,0), [(self.xPos-self.width, self.yPos-self.height), (self.xPos-self.width, self.yPos+self.height), (self.xPos+self.width, self.yPos+self.height), (self.xPos+self.width, self.yPos-self.height)])
 
@@ -33,7 +53,7 @@ screen = pygame.display.set_mode(size)
 xPos, yPos = width/2, height/2
 xPosTry = xPos
 yPosTry = yPos
-vel = 10
+vel = 1
 angle = 0
 g = grid.Grid()
 g.readFile("world.txt")
@@ -61,23 +81,33 @@ while 1:
     if keys[pygame.K_DOWN]:# or keys[pygame.K_S]:
         yPos += 1
     if keys[pygame.K_LEFT]:# or keys[pygame.K_A]:
-        angle -= 1
+        angle -= .1
     if keys[pygame.K_RIGHT]:# or keys[pygame.K_D]:
-        angle += 1
+        angle += .1
     #angle += int(rng.randint(-5,5))
 
 
     xPosTry = xPos + np.cos(angle*np.pi/180)
     yPosTry = yPos + np.sin(angle*np.pi/180)
-    xcol, ycol = 0,0
+    offset = math.sqrt(math.pow(radius,2)/2)
+    #xcol, ycol = 0,0
     for x in obstacles:
-        xcol, ycol = x.collision(xPosTry, yPosTry, radius)
+        if((abs(xPos + radius - (x.xPos - x.width)) < 3) and ((x.yPos - x.height - offset - 3) < yPos < (x.yPos + x.height + offset + 3))):
+            xPos = x.xPos - x.width - radius - 3
+        if((abs(xPos - radius - (x.xPos + x.width)) < 3) and ((x.yPos - x.height - offset - 3) < yPos < (x.yPos + x.height + offset + 3))):
+            xPos = x.xPos + x.width + radius + 3
+        if((abs(yPos - radius - (x.yPos + x.height)) < 3) and ((x.xPos - x.width - offset - 3) < xPos < (x.xPos + x.width + offset + 3))):
+            yPos = x.yPos + x.height + radius + 3
+        if((abs(yPos + radius - (x.yPos - x.height)) < 3) and ((x.xPos - x.width - offset - 3) < xPos < (x.xPos + x.width + offset + 3))):
+            yPos = x.yPos - x.height - radius - 3
+
+        '''xcol, ycol = x.collision(xPosTry, yPosTry, radius)
         if(xcol == 1 or ycol == 1):
-            break
-    if(xcol == 0):
-        xPos += np.cos(angle*np.pi/180)
-    if(ycol == 0):    
-        yPos += np.sin(angle*np.pi/180)
+            break'''
+    #if(xcol == 0):
+    xPos += .03*np.cos(angle*np.pi/180)
+    #if(ycol == 0):    
+    yPos += .03*np.sin(angle*np.pi/180)
 
     if(xPos+radius > width):
         xPos = width-radius
