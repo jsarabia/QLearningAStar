@@ -5,20 +5,22 @@ def qLearning(self, start, goal):
     qInit(q_table, self.world, goal)
     printQTable(q_table)
     printRewards(q_table)
+    alpha = 1
+    gamma = .8
     for i in range(1000):
         y = rnd.randint(0, len(q_table)-1)
         x = rnd.randint(0, len(q_table[y])-1)
         while(self.world[y][x] == "x" or q_table[y][x].getReward() == 100):
             y = rnd.randint(0, len(q_table)-1)
             x = rnd.randint(0, len(q_table[y])-1)
-        episode(self.world, q_table, q_table[y][x], 0, .8)
+        episode(self.world, q_table, q_table[y][x], 0, gamma, alpha)
     printQTable(q_table)
     #traverseGrid((0,0),(2,1), q_table, self.world)
     traverseGrid(start,goal, q_table, self.world)
 
 #gets neighbors, updates the reward, and then moves to the next state
 #returns if depth exceeded, goal reached, or an invalid state reached
-def episode(world, qt, state, depth, gamma):
+def episode(world, qt, state, depth, gamma, alpha):
     if(depth>150):
         #print("early death")
         return
@@ -38,9 +40,9 @@ def episode(world, qt, state, depth, gamma):
     #     return 0
     # print("Part 2 is "+ str(part2)+ " other part is " + str(part3) + " part 4 is " + str(part4))
     #print("winning states reward is " + str(qt[1][1].getActionReward("right")))
-    reward = next_state.getReward() + gamma*max([next_state.getActionReward(l) for l in next_state.getActions()]) # * (1/state.numTaken(direction)) 
+    reward = state.getActionReward(direction) + alpha*(next_state.getReward() + gamma*max([next_state.getActionReward(l) for l in next_state.getActions()]) - state.getActionReward(direction)) # * (1/state.numTaken(direction)) 
     state.setActionReward(direction, max(reward, state.getActionReward(direction)))
-    episode(world, qt, next_state, depth+1, gamma)
+    episode(world, qt, next_state, depth+1, gamma, alpha)
 
 #looks u/d/l/r for valid neighbors and adds them to a list
 def getNeighbors(world, qt, state):
@@ -162,8 +164,13 @@ def traverseGrid(start, goal, qt, world):
                     index = i
                     direction = x
                 i+=1
-            
-            print(direction)
+            print("Agent selects direction: ",direction)
+            if(rnd.randint(0,9) < 6):
+                wanted = direction
+                while(direction == wanted and len(neighbors) > 1):
+                    pick = rnd.randint(0, len(neighbors)-1)
+                    direction = neighbors[pick]
+            print("Agent moves in direction: ",direction)
             next_pos = None
             if(direction == "left"):
                 next_pos = qt[ys][xs-1]
