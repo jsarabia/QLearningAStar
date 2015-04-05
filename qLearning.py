@@ -11,15 +11,16 @@ def qLearning(self, start, goal):
         while(self.world[y][x] == "x" or q_table[y][x].getReward() == 100):
             y = rnd.randint(0, len(q_table)-1)
             x = rnd.randint(0, len(q_table[y])-1)
-        episode(self.world, q_table, q_table[y][x], 0, .5)
+        episode(self.world, q_table, q_table[y][x], 0, .8)
     printQTable(q_table)
-    traverseGrid((0,0),(2,1), q_table)
+    #traverseGrid((0,0),(2,1), q_table, self.world)
+    traverseGrid(start,goal, q_table, self.world)
 
 #gets neighbors, updates the reward, and then moves to the next state
 #returns if depth exceeded, goal reached, or an invalid state reached
 def episode(world, qt, state, depth, gamma):
     if(depth>150):
-        print("early death")
+        #print("early death")
         return
     (x,y) = state.getPosition()
     if(world[y][x] == "x"):
@@ -139,18 +140,44 @@ def printRewards(qt):
             string += str(qt[y][x].getReward()) + " "
         print(string)
 
-def traverseGrid(start, goal, qt):
+def traverseGrid(start, goal, qt, world):
     (xs,ys) = start
     (xg,yg) = goal
     reachedEnd = False
+    maxReward = 0
+    index = 0
+    i = 0
+    paths = []
     while(not reachedEnd):
         if(xs == xg and ys == yg):
             reachedEnd = True
             break;
         else:
-            next_state, direction = nextState(qt, qt[ys][xs].getActions(), qt[ys][xs])
+            neighbors = qt[ys][xs].getActions()
+            direction = neighbors[0]
+            for x in neighbors:
+                reward = qt[ys][xs].getActionReward(x)
+                if reward > maxReward:
+                    maxReward = reward
+                    index = i
+                    direction = x
+                i+=1
+            
             print(direction)
-            (xs,ys) = next_state.getPosition()
+            next_pos = None
+            if(direction == "left"):
+                next_pos = qt[ys][xs-1]
+            elif(direction == "right"):
+                next_pos = qt[ys][xs+1]
+            elif(direction == "up"):
+                next_pos = qt[ys-1][xs]
+            elif(direction == "down"):
+                next_pos = qt[ys+1][xs]
+            print(next_pos.getPosition())
+            (xs,ys) = next_pos.getPosition()
+            #print("now",xs,ys)
+            paths.append((xs,ys))
+    return paths
 
 
 class State:

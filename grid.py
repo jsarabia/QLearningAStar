@@ -59,7 +59,7 @@ g.readFile("world.txt")
 g.printWorld()
 start = (0,0)                  
 goal = (4,4)                   
-g.qLearning(start, goal)
+#g.qLearning(start, goal)
 
 return_paths, gcost, hcost, fcost = g.aStar(start, goal)    #added by yuksel
 
