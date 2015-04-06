@@ -97,8 +97,17 @@ while(int(algorithm) != 3 and int(algorithm) != 2 and int(algorithm) != 1):
         userGoalY = int(input("Enter the Y coordinate of the start state."))
 if(int(algorithm) == 1):
     g.qLearning((userStartX, userStartY), (userGoalX,userGoalY))
-if(int(algorithm == 2)):
+if(int(algorithm) == 2):
     return_paths, gcost, hcost, fcost = g.aStar((userStartX, userStartY), (userGoalX,userGoalY))    #added by yuksel
+    print("gcost")
+    g.draw_grid(gcost, (userStartX, userStartY),  (userGoalX,userGoalY))
+    print("hcost")
+    g.draw_grid(hcost, (userStartX, userStartY),  (userGoalX,userGoalY))
+    print("fcost")
+    g.draw_grid(fcost, (userStartX, userStartY),  (userGoalX,userGoalY))
+    print("path")
+    g.reconstruct_path(return_paths, (userStartX, userStartY),  (userGoalX,userGoalY))
+    print()
 
  
 

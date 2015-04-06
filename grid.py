@@ -61,7 +61,7 @@ start = (0,0)
 goal = (4,4)                   
 #g.qLearning(start, goal)
 
-return_paths, gcost, hcost, fcost = g.aStar(start, goal)    #added by yuksel
+'''return_paths, gcost, hcost, fcost = g.aStar(start, goal)    #added by yuksel
 
 #added by yuksel
 print("gcost")
@@ -73,4 +73,4 @@ g.draw_grid(fcost, start, goal)
 print("path")
 g.reconstruct_path(return_paths, start, goal)
 print()
-
+'''
